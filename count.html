@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Online Count</title></head>
+<body>
+  <h1>Online Players: <span id="count">0</span></h1>
+  <script>
+    setInterval(() => {
+      fetch('/online').then(r => r.json()).then(data => {
+        document.getElementById('count').textContent = data.online;
+      });
+    }, 5000); // Update every 5 seconds
+  </script>
+</body>
+</html>
