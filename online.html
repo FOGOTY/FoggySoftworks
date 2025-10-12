@@ -2,40 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Online Player Tracker</title>
+<title>🌐 Roblox Online Tracker</title>
 <style>
-body { background:#0e0e0e; color:#00ffb0; font-family:monospace; text-align:center; margin-top:100px; }
-h1 { font-size:45px; }
-p { color:#888; }
+body {
+  background-color: #0e0e0e;
+  color: #00ffaa;
+  font-family: monospace;
+  text-align: center;
+  margin-top: 80px;
+}
+h1 {
+  font-size: 48px;
+}
 </style>
 </head>
 <body>
-<h1>🌐 Online Players: <span id="count">0</span></h1>
-<p>Players are automatically removed after 1 minute of inactivity.</p>
-
+<h1>Online Players: <span id="count">0</span></h1>
 <script>
-let activePlayers = {}; // userid → lastActive timestamp (ms)
+let players = {}; // { userid: lastActiveTime }
 
-function updateCount() {
-  document.getElementById("count").textContent = Object.keys(activePlayers).length;
+function updateDisplay() {
+  document.getElementById("count").textContent = Object.keys(players).length;
 }
 
-// Simulate receiving a Roblox request (for testing via console)
-window.receivePing = function(userid) {
-  activePlayers[userid] = Date.now();
-  updateCount();
-};
-
-// Clean up inactive players every 10s
+// Remove inactive players every 10 seconds
 setInterval(() => {
   const now = Date.now();
-  for (let id in activePlayers) {
-    if (now - activePlayers[id] > 60000) { // 1 minute timeout
-      delete activePlayers[id];
-    }
+  for (let id in players) {
+    if (now - players[id] > 60000) delete players[id];
   }
-  updateCount();
+  updateDisplay();
 }, 10000);
+
+// Mock ping handler for local testing
+window.fakePing = (userid) => {
+  players[userid] = Date.now();
+  updateDisplay();
+};
+
+// --- SERVER-SIDE SIMULATION ---
+// If you deploy this on a Node or backend host, handle POST data and update `players`.
 </script>
 </body>
 </html>
