@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Online Players Counter</title>
+<style>
+body { background:#0d0d0d; color:#00ffae; font-family:monospace; text-align:center; margin-top:100px; }
+h1 { font-size:48px; }
+</style>
+</head>
+<body>
+<h1>🌐 Online Players: <span id="count">0</span></h1>
+
+<script>
+let players = {}; // { userid: lastActiveTime }
+let onlineCount = 0;
+
+// Update display
+function updateCount() {
+  onlineCount = Object.keys(players).length;
+  document.getElementById("count").textContent = onlineCount;
+}
+
+// Handle player pings
+window.addEventListener("message", (event) => {
+  const data = event.data;
+  if (data.type === "ping") {
+    const user = data.userid;
+    players[user] = Date.now();
+    updateCount();
+  }
+});
+
+// Clean inactive players every 10 sec
+setInterval(() => {
+  const now = Date.now();
+  for (let user in players) {
+    if (now - players[user] > 60000) { // 1 minute timeout
+      delete players[user];
+    }
+  }
+  updateCount();
+}, 10000);
+
+// Handle Roblox POST requests
+if (typeof addEventListener !== "undefined") {
+  // Works with Replit / Node backends — just for simulation here
+  window.handleRequest = (userid) => {
+    players[userid] = Date.now();
+    updateCount();
+    return JSON.stringify({ status: "OK", count: onlineCount });
+  };
+}
+</script>
+</body>
+</html>
