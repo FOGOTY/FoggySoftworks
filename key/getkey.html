@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoggySoftworks - Key Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #aaa;
+        }
+        
+        .card {
+            background-color: #111;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            border: 1px solid #333;
+        }
+        
+        .key-display {
+            font-family: monospace;
+            font-size: 1.2rem;
+            background-color: #000;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #444;
+            word-break: break-all;
+            display: none;
+        }
+        
+        .btn {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            box-shadow: 0 0 15px white, 0 0 25px white;
+            text-shadow: 0 0 5px white;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn:disabled:hover {
+            box-shadow: none;
+            text-shadow: none;
+        }
+        
+        .btn-secondary {
+            border-color: #aaa;
+            color: #aaa;
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 0 15px #aaa, 0 0 25px #aaa;
+            text-shadow: 0 0 5px #aaa;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background-color: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #0f0;
+        }
+        
+        .error {
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #f00;
+        }
+        
+        .info {
+            background-color: rgba(0, 100, 255, 0.1);
+            border: 1px solid rgba(0, 100, 255, 0.3);
+            color: #66f;
+        }
+        
+        .link-display {
+            margin-top: 20px;
+            font-size: 1rem;
+            word-break: break-all;
+            display: none;
+        }
+        
+        .link-display a {
+            color: #66f;
+            text-decoration: none;
+        }
+        
+        .link-display a:hover {
+            text-decoration: underline;
+        }
+        
+        .loader {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>FoggySoftworks</h1>
+            <div class="subtitle">Key Generation System</div>
+        </div>
+        
+        <div class="card">
+            <h2>Generate Your Key</h2>
+            <p>Click the button below to generate a unique access key for your account.</p>
+            
+            <button id="generateBtn" class="btn">Generate Key</button>
+            
+            <div class="loader" id="loader"></div>
+            
+            <div id="keyDisplay" class="key-display"></div>
+            
+            <button id="copyBtn" class="btn btn-secondary" style="display: none;">Copy Key</button>
+            
+            <div id="status" class="status"></div>
+            
+            <div id="linkDisplay" class="link-display"></div>
+        </div>
+        
+        <div class="footer">
+            &copy; 2023 FoggySoftworks. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const keyDisplay = document.getElementById('keyDisplay');
+            const status = document.getElementById('status');
+            const loader = document.getElementById('loader');
+            const linkDisplay = document.getElementById('linkDisplay');
+            
+            // Generate a random key with 20 characters (letters and numbers)
+            function generateKey() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let key = '';
+                for (let i = 0; i < 20; i++) {
+                    key += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return key;
+            }
+            
+            // Display status message
+            function showStatus(message, type) {
+                status.textContent = message;
+                status.className = 'status ' + type;
+                status.style.display = 'block';
+                
+                // Auto-hide success messages after 5 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 5000);
+                }
+            }
+            
+            // Copy key to clipboard
+            copyBtn.addEventListener('click', function() {
+                const keyText = keyDisplay.textContent;
+                navigator.clipboard.writeText(keyText).then(() => {
+                    showStatus('Key copied to clipboard!', 'success');
+                }).catch(err => {
+                    showStatus('Failed to copy key: ' + err, 'error');
+                });
+            });
+            
+            // Generate key and create page
+            generateBtn.addEventListener('click', async function() {
+                // Show loader
+                loader.style.display = 'block';
+                generateBtn.disabled = true;
+                
+                try {
+                    // Generate key
+                    const key = generateKey();
+                    
+                    // Create HTML content for the key page
+                    const keyPageContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your FoggySoftworks Key</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #000; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .container { max-width: 600px; text-align: center; }
+        h1 { margin-bottom: 20px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+        .key { font-family: monospace; font-size: 1.2rem; background-color: #111; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #444; word-break: break-all; }
+        .btn { background-color: transparent; color: white; border: 2px solid white; padding: 10px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; margin: 10px; }
+        .btn:hover { box-shadow: 0 0 15px white, 0 0 25px white; text-shadow: 0 0 5px white; }
+        .status { margin-top: 20px; padding: 10px; border-radius: 5px; display: none; }
+        .success { background-color: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #0f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Your FoggySoftworks Key</h1>
+        <p>Here is your unique access key. Keep it safe!</p>
+        <div class="key">${key}</div>
+        <button id="copyBtn" class="btn">Copy Key</button>
+        <div id="status" class="status"></div>
+    </div>
+    <script>
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const keyText = document.querySelector('.key').textContent;
+            navigator.clipboard.writeText(keyText).then(() => {
+                const status = document.getElementById('status');
+                status.textContent = 'Key copied to clipboard!';
+                status.className = 'status success';
+                status.style.display = 'block';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            });
+        });
+    <\/script>
+</body>
+</html>`;
+                    
+                    // Generate a unique filename
+                    const filename = 'key_' + Date.now() + '.html';
+                    
+                    // For demonstration purposes, we'll simulate the GitHub API calls
+                    // In a real implementation, you would use the GitHub PAT to commit the file
+                    
+                    // Simulate creating the key page in GitHub
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Create short URL using Cuty.io API
+                    const destinationUrl = `https://foggysoftworks.xyz/key/users/${filename}`;
+                    const apiToken = 'a6ade5b8c81ea92210937fa54';
+                    const apiUrl = `https://api.cuty.io/quick?token=${apiToken}&url=${encodeURIComponent(destinationUrl)}&format=text`;
+                    
+                    try {
+                        const response = await fetch(apiUrl);
+                        const shortUrl = await response.text();
+                        
+                        // Display the results
+                        keyDisplay.textContent = key;
+                        keyDisplay.style.display = 'block';
+                        copyBtn.style.display = 'inline-block';
+                        
+                        linkDisplay.innerHTML = `Your key page: <a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+                        linkDisplay.style.display = 'block';
+                        
+                        showStatus('Key generated successfully!', 'success');
+                        
+                        // In a real implementation, you would:
+                        // 1. Commit the key page to GitHub repository
+                        // 2. Add the key to the storage file in the other repository
+                        // 3. Handle any errors appropriately
+                        
+                    } catch (error) {
+                        showStatus('Error creating short URL: ' + error.message, 'error');
+                    }
+                    
+                } catch (error) {
+                    showStatus('Error generating key: ' + error.message, 'error');
+                } finally {
+                    // Hide loader
+                    loader.style.display = 'none';
+                    generateBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
